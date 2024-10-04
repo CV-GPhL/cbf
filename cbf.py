@@ -5,6 +5,7 @@ import base64
 import collections
 import cbf_c
 import re
+import gzip
 
 miniheader_re = re.compile(
     b'(.*^data_(?P<prefix>.*?)_\d+\r\n)?'
@@ -95,7 +96,10 @@ def write(filename, data, header=None, size_padding=0):
     md5_hash = base64.b64encode(hashlib.md5(output_buffer).digest()).decode()
 
     # Write file
-    file_handle = open(filename, 'wb')
+    if (filename.endswith('.gz')):
+        file_handle = gzip.open(filename, 'wb')
+    else:
+        file_handle = open(filename, 'wb')
     # file_handle.write(header['version'])
     # file_handle.write(header['convention'])
     # file_handle.write(header['contents'])
@@ -126,7 +130,10 @@ def read(filename, metadata=True, parse_miniheader=False):
     :return: Data (namedtuple('data', 'metadata', 'miniheader')), None for both metadata/miniheader if False in params.
     """
 
-    file_descriptor = open(filename, 'rb')
+    if (filename.endswith('.cbf.gz')):
+        file_descriptor = gzip.open(filename,'rb')
+    else:
+        file_descriptor = open(filename, 'rb')
     file_content = file_descriptor.read()
     file_descriptor.close()
 
